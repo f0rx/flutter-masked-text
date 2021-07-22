@@ -32,10 +32,9 @@ class MaskedTextController extends TextEditingController {
   String _lastUpdatedText = '';
 
   void updateText(String text) {
-    if(text != null){
+    if (text != null) {
       this.text = this._applyMask(this.mask, text);
-    }
-    else {
+    } else {
       this.text = '';
     }
 
@@ -129,16 +128,16 @@ class MaskedTextController extends TextEditingController {
 class MoneyMaskedTextController extends TextEditingController {
   MoneyMaskedTextController(
       {double initialValue = 0.0,
-        this.decimalSeparator = ',',
-        this.thousandSeparator = '.',
-        this.rightSymbol = '',
-        this.leftSymbol = '',
-        this.precision = 2}) {
+      this.decimalSeparator = ',',
+      this.thousandSeparator = '.',
+      this.rightSymbol = '',
+      this.leftSymbol = '',
+      this.precision = 2}) {
     _validateConfig();
 
     this.addListener(() {
-      this.updateValue(this.numberValue);
-      this.afterChange(this.text, this.numberValue);
+      this.updateValue(this?.numberValue);
+      this.afterChange(this.text, this?.numberValue);
     });
 
     this.updateValue(initialValue);
@@ -155,12 +154,13 @@ class MoneyMaskedTextController extends TextEditingController {
   double _lastValue = 0.0;
 
   void updateValue(double value) {
+    if (value == null) return;
+
     double valueToUse = value;
 
     if (value.toStringAsFixed(0).length > 12) {
       valueToUse = _lastValue;
-    }
-    else {
+    } else {
       _lastValue = value;
     }
 
@@ -184,11 +184,12 @@ class MoneyMaskedTextController extends TextEditingController {
   }
 
   double get numberValue {
-    List<String> parts = _getOnlyNumbers(this.text).split('').toList(growable: true);
+    List<String> parts =
+        _getOnlyNumbers(this.text).split('').toList(growable: true);
 
     parts.insert(parts.length - precision, '.');
 
-    return double.parse(parts.join());
+    return double.tryParse(parts.join());
   }
 
   _validateConfig() {
@@ -210,7 +211,8 @@ class MoneyMaskedTextController extends TextEditingController {
   }
 
   String _applyMask(double value) {
-    List<String> textRepresentation = value.toStringAsFixed(precision)
+    List<String> textRepresentation = value
+        .toStringAsFixed(precision)
         .replaceAll('.', '')
         .split('')
         .reversed
@@ -221,8 +223,7 @@ class MoneyMaskedTextController extends TextEditingController {
     for (var i = precision + 4; true; i = i + 4) {
       if (textRepresentation.length > i) {
         textRepresentation.insert(i, thousandSeparator);
-      }
-      else {
+      } else {
         break;
       }
     }
